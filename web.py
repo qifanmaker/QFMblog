@@ -16,10 +16,10 @@ import string
 import io
 
 ############################
-file_route = "D:\qifan_maker\project\keynote\\blog\public\\"
-server_ip = "192.168.1.78"
+file_route = "Your file route"
+server_ip = "Your ip"
 server_port = 80
-debug = True
+debug = False
 ############################
 
 app = Flask(__name__)

@@ -1,0 +1,100 @@
+<html>
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}-用户管理</Title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    </head>
+    <body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if not ("username" in session) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        
+		<div style="margin-top: 40px;">
+			<div class="card max">
+                <h2>{{ web_name }} / 用户管理</h2>
+                <div>
+                    <div class="buttom"><a href="/admin/user/_new" target="_self" title="新建用户" class="bmcss">新建用户</a></div>
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>用户类型</th>
+                                <th>用户名</th>
+                                <th>登录信息</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in user %}
+                                <tr>
+                                    {% if user[i].get("power")=="super" %}
+                                    <td><strong style="color: goldenrod;">超级管理员</strong></td>
+                                    {% elif user[i].get("power")=="admin" %}
+                                    <td><strong style="color: purple;">管理员</strong></td>
+                                    {% elif user[i].get("power")=="user" %}
+                                    <td>用户</td>
+                                    {% else %}
+                                    <td><strong style="color: brown;">封禁用户</strong></td>
+                                    {% endif %}
+                                    <td>{{ i }}</td>
+                                    <td>
+                                        {% if user[i].get("password") == "LoginNotAllowed" %}
+                                        <strong style="color:coral;">登录被禁止</strong>
+                                        {% else %}
+                                        <small style="color: green;">正常</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                    <a href="/user/{{ i }}" target="_self" title="访问">访问</a>
+                                    {% if user[i].get("power")=="user" or user[i].get("power")=="banned" or i==session.get("username") or user[session.get("username")].get("power")=="super" %}
+                                    <a href="/admin/user/{{ i }}" target="_self" title="管理">管理</a>
+                                    {% endif %}
+                                </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+    </body>
+</html>

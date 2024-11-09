@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>429 - 访问频率超限</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+	</head>
+	<body>
+        <div class="header">
+            <div class="max" style="text-align: left; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+        </div>
+        
+		<div style="margin-top: 40px;">
+			<div class="card max">
+				<h1 class="ctitle">429</h1>
+				<p>访问频率超限</p>
+				<p><small>访问频率超出限制，请稍后刷新重试</small></p>
+				<p><small>{{ error }}</small></p>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+	</body>
+</html>

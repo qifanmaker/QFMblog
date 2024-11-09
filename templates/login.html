@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang-"en">
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}-登录</Title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    </head>
+    <body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+            <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+        </div>
+
+		<div style="margin-top: 40px;">
+			<div class="menu">
+                <form action="/login" method="post">
+                    <div style="text-align: center;"><h2>{{ web_name }} / 登录</h2></div>
+                    
+                    <div>
+                        <span class="info_name" style="padding-right: 2em; vertical-align: middle;">用户名</span>
+                        <input type="text" name="username" placeholder="用户名"/>
+                    </div>
+
+                    <div>
+                        <span class="info_name" style="vertical-align: middle;">密码</span>
+                        <input type="password" name="password" placeholder="密码"/>
+                    </div>
+
+                    <div>
+                        <span class="info_name" style="padding-right: 2em;">验证码</span>
+                        <div style="display: inline-flex; flex-direction: column;">
+                            <div>
+                                <img src="/captcha" onclick="location.reload()">
+                                <small>看不清？点击刷新</small>
+                            </div>
+                            <input type="text" name="captcha" placeholder="验证码" style="width: 4em;"/>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <input type="submit" value="登录">
+                    </div>
+                </form>
+
+                <div class="max" style="text-align: right;position: absolute; bottom: 0;">
+                    <h4 class="my-h4">{{ web_footer | safe }}</h4>
+                </div>
+			</div>
+
+		</div>
+    </body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}</Title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='katex/katex.min.inline.css') }}">
+
+        <!-- The loading of KaTeX is deferred to speed up page rendering -->
+        <script defer src="{{ url_for('static', filename='katex/katex.min.js') }}"></script>
+
+        <!-- To automatically render math in text elements, include the auto-render extension: -->
+        <script defer src="{{ url_for('static', filename='katex/contrib/auto-render.min.inline.js') }}"
+            onload="renderMathInElement(document.body);"></script>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='highlight/styles/default.min.css') }}">
+        <script src="{{ url_for('static', filename='highlight/highlight.min.js') }}"></script>
+            
+        <script src="{{ url_for('static', filename='highlight/languages/go.min.js') }}"></script>
+            
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.0/showdown.min.js"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if ((not ("username" in session)) or (not (session.get("username") in user))) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+
+        {% if ("username" in session and session.get("username") in user and user[session.get('username')].get("power")=="banned") %}
+        <div class="alert-error" style="margin: 0;">
+            你已被封禁，申诉请联系管理员说明情况
+        </div>
+        {% endif %}
+		<div style="margin-top: 40px;">
+			<div class="max">
+                <section class="blog">
+                    <h1 class="ctitle">{{ web_name }}</h1>
+                    
+                    <div style="text-align: center;">
+                        <p>
+                            <a href="/image/list" target="_self" title="图床">图床</a>
+                            ·
+                            <a href="/blog/list" target="_self" title="博客">博客</a>
+                            ·
+                            <a href="/judgement" target="_self" title="陶片放逐">陶片放逐</a>
+                        </p>
+                    </div>
+                </section>
+                <section class="blog-content side">
+                    <h3>最新文章</h3>
+                    {% for i in blog_list %}
+                    <div>
+                        <a href="/blog?id={{ i }}" target="_self">{{ blog_list[i][0] | safe }}</a>
+                        {% if blog_list[i][5] %}
+                        <span class="topping">置顶</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </section>
+                <section class="blog-content main">
+                    <h3>公告</h3>
+                    {{ proclamation | safe }}
+                </section>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: left;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+    </body>
+</html>

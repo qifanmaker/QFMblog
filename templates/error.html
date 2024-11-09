@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>错误</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+        <SCRIPT language=javascript>
+            function go()
+            {
+            window.history.go(-1);
+            }
+            setTimeout("go()",3000);
+        </SCRIPT>
+	</head>
+	<body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if not ("username" in session) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        
+		<div style="margin-top: 40px;">
+			<div class="blog-content max">
+                <div style="float: right;">
+                    <small>3 秒后返回上一页...</small>
+                </div>
+				<h2>出错啦</h2>
+				<p>{{ ERROR }}</p>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+	</body>
+</html>

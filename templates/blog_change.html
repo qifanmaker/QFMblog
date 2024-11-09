@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}-管理文章</Title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='katex/katex.min.inline.css') }}">
+
+        <!-- The loading of KaTeX is deferred to speed up page rendering -->
+        <script defer src="{{ url_for('static', filename='katex/katex.min.js') }}"></script>
+
+        <!-- To automatically render math in text elements, include the auto-render extension: -->
+        <script defer src="{{ url_for('static', filename='katex/contrib/auto-render.min.inline.js') }}"
+            onload="renderMathInElement(document.body);"></script>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='highlight/codesty.css') }}">
+        <script src="{{ url_for('static', filename='highlight/highlight.min.js') }}"></script>
+            
+        <script src="{{ url_for('static', filename='highlight/languages/go.min.js') }}"></script>
+            
+        
+        <script src="{{ url_for('static', filename='showdown/showdown.js') }}"></script>
+
+        <script defer src="{{ url_for('static', filename='js/markdown.js') }}"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if not ("username" in session) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        
+		<div style="margin-top: 40px;">
+			<div class="blog-content max">
+                <h3>{{ web_name }}-管理文章</h3>
+                <div>
+                    <form action="/blog/change?id={{ blogID }}" method="post">
+                        <div>
+                            <div>
+                                <span class="info_name">文章编号</span>
+                                <span>{{ blogID }}</span>
+                            </div>
+                            <div>
+                                <span class="info_name">发布时间</span>
+                                <div style="display: inline-block;">
+                                    <div id="time-show">Loading...</div>
+                                    <div>
+                                        {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                                        <input type="text" name="blog_time" placeholder="时间修改" value="{{ blog_time }}" id="time-get"/>
+                                        {% endif %}
+                                    </div>  
+                                    <script>
+                                        let time_get = document.getElementById("time-get"),
+                                            time_show = document.getElementById("time-show");
+                                        let tran_time = (function () {
+                                            return function () {
+                                                var date = new Date(time_get.value*1000);
+                                                Y = date.getFullYear() + '-';
+                                                M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                                                D = (date.getDate() < 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+                                                h = (date.getHours() < 10 ? '0'+(date.getHours()) : date.getHours()) + ':';
+                                                m = (date.getMinutes() < 10 ? '0'+(date.getMinutes()) : date.getMinutes()) + ':';
+                                                s = (date.getSeconds() < 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+                                                time_show.innerHTML = Y+M+D+h+m+s;
+                                            }
+                                        })();
+
+                                        time_get.onkeyup = tran_time;
+                                        onload = tran_time;
+                                    </script>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="info_name">文章作者</span>
+                                {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                                <input type="text" name="blog_user" placeholder="文章作者" value="{{ blog_user }}"/>
+                                {% else %}
+                                <span>{{ blog_user }}</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <span class="info_name">文章名称</span>
+                                <input type="text" name="blog_name" placeholder="文章名称" value="{{ blog_name | safe }}"/>
+                            </div>
+                            <div>
+                                <span class="info_name">文章简介</span>
+                                <input type="text" name="blog_about" placeholder="文章简介" value="{{ blog_about | safe }}"/>
+                            </div>
+                            <div>
+                                <span class="info_name">文章类型</span>
+                                <select name="blog_type">
+                                    {% for i in blog_typel %}
+                                    {% if not i == "admin" %}
+                                    {% if i == blog_type %}
+                                    <option value="{{ i }}" selected>{{ blog_typel[i] }}</option>
+                                    {% else %}
+                                    <option value="{{ i }}">{{ blog_typel[i] }}</option>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                                    {% if "admin" == blog_type %}
+                                    <option value="admin" selected>站务</option>
+                                    {% else %}
+                                    <option value="admin">站务</option>
+                                    {% endif %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div>
+                                <span class="info_name">文章状态</span>
+                                {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                                    {% if topping %}
+                                    <input class="radio_type" type="checkbox" name="topping" placeholder="置顶" id="topping" checked/>
+                                    {% else %}
+                                    <input class="radio_type" type="checkbox" name="topping" placeholder="置顶" id="topping"/>
+                                    {% endif %}
+                                    <label for="topping">置顶</label>
+                                {% endif %}
+                                {% if hiding %}
+                                <input class="radio_type" type="checkbox" name="hiding" placeholder="隐藏" id="hiding" checked/>
+                                {% else %}
+                                <input class="radio_type" type="checkbox" name="hiding" placeholder="隐藏" id="hiding"/>
+                                {% endif %}
+                                <label for="hiding">隐藏</label>
+                            </div>
+                            <div>
+                                <span class="info_name">文章内容</span>
+                                <div class="blogc">
+                                    <div class="mk-editor">
+                                        <textarea id="editor-edit" class="cur" name="blogc" rows="20" cols="80" placeholder="文章内容" style="border: none;">{{ blogc | safe }}</textarea>
+                                        <div id="editor-show" style="width: 50%;">Loading...</div>
+                                    </div>
+                                    <p><small>建议使用 Markdown、KaTeX 等工具。</small></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <input type="submit" value="保存">
+                            <a href="/blog/del?id={{ blogID }}" target="_self" title="删除" class="bmcss">删除</a>
+                        </div>
+                    </form>
+                </div>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}-博客</Title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    
+            <link rel="stylesheet" href="{{ url_for('static', filename='katex/katex.min.inline.css') }}">
+    
+            <!-- The loading of KaTeX is deferred to speed up page rendering -->
+            <script defer src="{{ url_for('static', filename='katex/katex.min.js') }}"></script>
+    
+            <!-- To automatically render math in text elements, include the auto-render extension: -->
+            <script defer src="{{ url_for('static', filename='katex/contrib/auto-render.min.inline.js') }}"
+                onload="renderMathInElement(document.body);"></script>
+    
+            <link rel="stylesheet" href="{{ url_for('static', filename='highlight/codesty.css') }}">
+            <script src="{{ url_for('static', filename='highlight/highlight.min.js') }}"></script>
+                
+            <script src="{{ url_for('static', filename='highlight/languages/go.min.js') }}"></script>
+                
+            
+            <script src="{{ url_for('static', filename='showdown/showdown.js') }}"></script>
+        
+            <script>hljs.highlightAll();</script>
+    </head>
+    <body style="display: none;">
+        <script type="text/javascript">
+            document.onreadystatechange = function () {
+                if (document.readyState == "complete") {
+                    document.body.style.display = "block";
+                } else {
+                    document.body.style.display = "none";
+                };
+            };
+        </script>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if not ("username" in session) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if ("username" in session and session.get("username") in user and user[session.get('username')].get("power")=="banned") %}
+        <div class="alert-error" style="margin: 0;">
+            你已被封禁，申诉请联系管理员说明情况
+        </div>
+        {% endif %}
+        {% if not hiding %}
+        <div class="alert-hint" style="margin: 0;">
+            该文章已被隐藏
+        </div>
+        {% endif %}
+		<div style="margin-top: 40px;">
+			<div class="blog max">
+                <div>
+                    <div style="float: right; ">
+                        {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" or session.get("username") == blog_user %}
+                        <a href="/blog/change?id={{ blogID }}" target="_self" title="编辑文章" class="bmcss">编辑文章</a>
+                        {% endif %}
+                    </div>
+                    <h1 class="ctitle" id="top">{{ blog_name | safe }}</h1>
+                    <div style="float: right;">
+                        <div>
+                            <p style="display: inline; padding-right: 3em;">分类</p>
+                            <a class="my-h4" href="/blog/list?tag={{ blog_type }}">{{ blog_typel[blog_type] }}</a>
+                        </div>
+                        <div>
+                            <p style="display: inline; padding-right: 3em;">作者</p>
+                            <div style="display: inline;">
+                                <img src="{{ url_for('static', filename='images/usericon/'+blog_user+'.png') }}" class="avatar" style="height: 30px; width: 30px;">
+                                <a class="my-h4" href="/user/{{ blog_user }}">{{ blog_user }}</a>
+                            </div>
+                        </div>
+                        <div>
+                            <p style="display: inline; padding-right: 1em;">发布时间</p>
+                            <div style="display: inline;">
+                                <h4 class="my-h4">
+                                    <script>
+                                        var date = new Date({{ blog_time }}*1000);
+                                        Y = date.getFullYear() + '-';
+                                        M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                                        D = (date.getDate() < 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+                                        h = (date.getHours() < 10 ? '0'+(date.getHours()) : date.getHours()) + ':';
+                                        m = (date.getMinutes() < 10 ? '0'+(date.getMinutes()) : date.getMinutes()) + ':';
+                                        s = (date.getSeconds() < 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+                                        document.write(Y+M+D+h+m+s);
+                                    </script>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="align-items: center;">
+                            <img src="data:image/svg+xml,%3csvg%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20clip-path='url(%23clip0_594_97)'%3e%3cpath%20d='M10.0625%204.375C4.0625%204.375%200.4375%2010.5%200.4375%2010.5C0.4375%2010.5%204.625%2016.4375%2010.0625%2016.4375C15.5%2016.4375%2019.6875%2010.5%2019.6875%2010.5C19.6875%2010.5%2016.0625%204.375%2010.0625%204.375ZM16.25%2012.75C14.25%2014.4375%2012.125%2015.5%2010%2015.5C7.875%2015.5%205.75%2014.5%203.75%2012.75C3.0625%2012.125%202.375%2011.5%201.8125%2010.8125C1.6875%2010.6875%201.625%2010.5625%201.5%2010.4375C1.5625%2010.3125%201.6875%2010.1875%201.75%2010.0625C2.25%209.375%202.875%208.6875%203.5625%208.0625C5.5%206.3125%207.625%205.25%2010%205.25C12.375%205.25%2014.5%206.3125%2016.4375%208.0625C17.125%208.6875%2017.6875%209.375%2018.25%2010.0625C18.3125%2010.1875%2018.4375%2010.3125%2018.5%2010.4375C18.4375%2010.5625%2018.3125%2010.6875%2018.1875%2010.8125C17.625%2011.4375%2017%2012.125%2016.25%2012.75Z'%20fill='black'%20fill-opacity='0.4'/%3e%3cpath%20d='M10%206.75C8.125%206.75%206.6875%208.25%206.6875%2010.0625C6.6875%2011.9375%208.1875%2013.375%2010%2013.375C11.875%2013.375%2013.3125%2011.875%2013.3125%2010.0625C13.3125%208.25%2011.8125%206.75%2010%206.75ZM10%2012.5C8.6875%2012.5%207.625%2011.4375%207.625%2010.125C7.625%208.8125%208.6875%207.75%2010%207.75C11.3125%207.75%2012.375%208.8125%2012.375%2010.125C12.375%2011.375%2011.3125%2012.5%2010%2012.5Z'%20fill='black'%20fill-opacity='0.4'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_594_97'%3e%3crect%20width='20'%20height='20'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e" style="width: 1.25rem;height: 1rem;">
+                            <span><small>{{view_count}} views</small></span>
+                        </div>
+                        <div class="align-items: center;">
+                            <img src="data:image/svg+xml,%3csvg%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20clip-path='url(%23clip0_597_308)'%3e%3cpath%20d='M16.5499%205.70714H13.7612C13.7612%205.70714%2014.1249%204.49286%2014.3674%202.30714C14.4887%201.21429%2013.6399%200.121429%2012.4274%200H12.1849C11.2149%200%2010.6087%200.607143%2010.2449%201.45714L9.51745%203.27857C8.9112%204.49286%208.4262%205.22143%208.06246%205.46429C7.57746%205.70714%205.75872%205.70714%205.63747%205.70714H3.21249C2.485%205.70714%202%206.19286%202%206.8V15.9071C2%2016.5143%202.485%2017%203.21249%2017H15.4587C17.2774%2017%2017.7624%2015.7857%2018.0049%2014.0857L18.9749%208.25714C19.0961%206.92143%2018.8536%205.70714%2016.5499%205.70714ZM5.63747%2015.9071H3.21249V6.8H5.63747V15.9071ZM17.7624%208.13571L16.7924%2013.9643C16.5499%2015.0571%2016.5499%2015.9071%2015.3374%2015.9071H6.84997V6.8C7.69871%206.8%208.18371%206.67857%208.54745%206.43571C9.1537%206.19286%209.75995%205.22143%2010.6087%203.64286C11.0937%202.42857%2011.3362%201.82143%2011.4574%201.7C11.5787%201.33571%2011.8212%201.09286%2012.3062%201.09286H12.4274C13.0337%201.09286%2013.2762%201.7%2013.2762%202.06429C13.0337%204.00714%2012.6699%205.22143%2012.6699%205.22143L12.1849%206.8H16.7924C17.1561%206.8%2017.3986%206.8%2017.6411%207.04286C17.8836%207.28571%2017.7624%207.77143%2017.7624%208.13571Z'%20fill='black'%20fill-opacity='0.4'/%3e%3c/g%3e%3cdefs%3e%3cclipPath%20id='clip0_597_308'%3e%3crect%20width='20'%20height='20'%20fill='white'/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e" style="width: 1.25rem;height: 1rem;">
+                            <span><small>0 supports</small></span>
+                        </div>
+                        <div>
+                            <small>—— {{ blog_about | safe }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			<div class="blog-content max" id="blog-show">
+                <textarea id="blog-md" style="display: none;">{{ blogc }}</textarea>
+                <script>
+                    let converter = new showdown.Converter({tables: true}),
+                        container_md = document.getElementById("blog-md"),
+                        container_show = document.getElementById("blog-show");
+                    container_show.innerHTML = converter.makeHtml(container_md.value);
+                </script>
+            </div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+    </body>
+</html>

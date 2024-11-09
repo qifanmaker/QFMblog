@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}/博客管理</Title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+        <script src="{{ url_for('static', filename='js/blog_search.js') }}"></script>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='katex/katex.min.inline.css') }}">
+
+        <!-- The loading of KaTeX is deferred to speed up page rendering -->
+        <script defer src="{{ url_for('static', filename='katex/katex.min.js') }}"></script>
+
+        <!-- To automatically render math in text elements, include the auto-render extension: -->
+        <script defer src="{{ url_for('static', filename='katex/contrib/auto-render.min.inline.js') }}"
+            onload="renderMathInElement(document.body);"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if not ("username" in session) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        
+		<div style="margin-top: 40px;">
+			<div class="blog max">
+                <h2 style="text-align: center;">{{ web_name }} / 博客管理</h2>
+                <div>
+                    <div>
+                        
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>编号</th>
+                                    <th>名称</th>
+                                    <th>简介</th>
+                                    <th>用户</th>
+                                    <th>分类</th>
+                                    <th>时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in blog_list %}
+                                <tr>
+                                <td>
+                                    <a href="/blog?id={{ i }}" target="_self">{{ i }}</a>
+                                </td>
+                                <td>
+                                    {{ blog_list[i][0] }}
+                                    {% if blog_list[i][5] %}
+                                    <span class="topping">置顶</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <p>{{ blog_list[i][1] }}</p>
+                                </td>
+                                <td>
+                                    {% if (not blog_list[i][2] in user) %}
+                                    <a style="color: black;">{{ blog_list[i][2] }}</a>
+                                    {% elif user[blog_list[i][2]].get("power")=="admin" or user[blog_list[i][2]].get("power")=="super" %}
+                                    <a href="/user/{{ blog_list[i][2] }}" style="color: purple;">{{ blog_list[i][2] }}</a>
+                                    {% elif user[blog_list[i][2]].get("power")=="banned" %}
+                                    <a href="/user/{{ blog_list[i][2] }}" style="color: rgb(173, 139, 0);">{{ blog_list[i][2] }}</a>
+                                    {% else %}
+                                    <a href="/user/{{ blog_list[i][2] }}">{{ blog_list[i][2] }}</a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <p>{{ blog_type[blog_list[i][4]] }}</p>
+                                </td>
+                                <td>
+                                    <p>
+                                        <script>
+                                            var date = new Date({{ blog_list[i][3] }}*1000);
+                                            Y = date.getFullYear() + '-';
+                                            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                                            D = (date.getDate() < 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+                                            h = (date.getHours() < 10 ? '0'+(date.getHours()) : date.getHours()) + ':';
+                                            m = (date.getMinutes() < 10 ? '0'+(date.getMinutes()) : date.getMinutes()) + ':';
+                                            s = (date.getSeconds() < 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+                                            document.write(Y+M+D+h+m+s);
+                                        </script>
+                                    </p>
+                                </td>
+                                <td>
+                                    {% if blog_list[i][7] %}
+                                    <p style="color: green;">显示</p>
+                                    {% else %}
+                                    <!-- <p style="color: #ff9e01;">隐藏</p> -->
+                                    <p style="color: red;">隐藏</p>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/blog?id={{ i }}&_ContentOnly">MD</a>
+                                    <a href="/blog/change?id={{ i }}">管理</a>
+                                    <a href="/blog/del?id={{ i }}">删除</a>
+                                </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,159 @@
+<html>
+    <head>
+        <met charset="UTF-8">
+        <title>{{ web_name }}-用户管理</Title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    
+            <link rel="stylesheet" href="{{ url_for('static', filename='katex/katex.min.inline.css') }}">
+    
+            <!-- The loading of KaTeX is deferred to speed up page rendering -->
+            <script defer src="{{ url_for('static', filename='katex/katex.min.js') }}"></script>
+    
+            <!-- To automatically render math in text elements, include the auto-render extension: -->
+            <script defer src="{{ url_for('static', filename='katex/contrib/auto-render.min.inline.js') }}"
+                onload="renderMathInElement(document.body);"></script>
+    
+            <link rel="stylesheet" href="{{ url_for('static', filename='highlight/codesty.css') }}">
+            <script src="{{ url_for('static', filename='highlight/highlight.min.js') }}"></script>
+                
+            <script src="{{ url_for('static', filename='highlight/languages/go.min.js') }}"></script>
+                
+            <script src="{{ url_for('static', filename='showdown/showdown.js') }}"></script>
+    
+            <script defer src="{{ url_for('static', filename='js/markdown.js') }}"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="max" style="margin-right: 5px; margin-bottom: 5px; margin-top: 5px;">
+                <a class="my-h2" href="/">{{ web_name }}</a>
+                <h4 class="my-h4">Developed by qifan_maker</h4>
+            </div>
+            <div class="max" style="margin-left: 5px; margin-bottom: 5px;">
+                {% if not ("username" in session) %}
+                    <div style="margin-top: 10px;"><a href="/login" target="_self" title="登录">登录</a></div>
+                {% else %}
+                    <div class="down-bar">
+                        <span>
+                            <img src="{{ url_for('static', filename='images/usericon/'+session.get('username')+'.png') }}" class="avatar">
+                            {% if user[session.get("username")].get("power")=="super" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">吉祥物</span>
+                            {% elif user[session.get("username")].get("power")=="admin" %}
+                            <h4 class="my-h4" style="color: purple;">{{ session.get("username") }}</h4>
+                            <span class="admin-tag">管理员</span>
+                            {% elif user[session.get("username")].get("power")=="banned" %}
+                            <h4 class="my-h4" style="color: rgb(173, 139, 0);">{{ session.get("username") }}</h4>
+                            <span class="banned-tag">封禁用户</span>
+                            {% else %}
+                            <h4 class="my-h4">{{ session.get("username") }}</h4>
+                            {% endif %}
+                        </span>
+                        <div>
+                            <div class="drop"><a href="/user/{{ session.get('username') }}">个人主页</a></div>
+                            {% if user[session.get("username")].get("power")=="admin" or user[session.get("username")].get("power")=="super" %}
+                            <div class="drop"><a href="/admin">管理后台</a></div>
+                            {% endif %}
+                            <div class="drop"><a href="/unlogin" target="_self" title="退出登录">退出登录</a></div>
+                        </div>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        
+		<div style="margin-top: 40px;">
+			<div class="blog-content max">
+                <h2>{{ web_name }} / 用户管理</h2>
+                <div>
+                    <form action="/admin/user/{{ uns }}" method="post">
+                        <div>
+                            <span class="info_name" style="padding-right: 4em;">用户名</span>
+                            <a href="/user/{{ uns }}">{{ uns }}</a>
+                        </div>
+                        <div>
+                            <span class="info_name">重置密码</span>
+                            <div style="display: inline-block;">
+                                <input type="password" name="password"/>
+                                <p><small>不修改请留空，不允许登录请将密码设为 <strong>LoginNotAllowed</strong></small></p>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="info_name" style="padding-right: 5em;">权限</span>
+                            {% if uns in user %}
+                                {% if user.get(uns).get("power")=="super" %}
+                                <input class="radio_type" type="radio" name="power" value="super" id="super" checked/>
+                                <label for="super">超级管理员</label>
+                                {% elif (user.get(session.get("username")).get("power")=="super") %}
+                                <input class="radio_type" type="radio" name="power" value="super" id="super"/>
+                                <label for="super">超级管理员</label>
+                                {% endif %}
+
+                                {% if user.get(uns).get("power")=="admin" %}
+                                <input class="radio_type" type="radio" name="power" value="admin" id="admin" checked/>
+                                <label for="admin">管理员</label>
+                                {% elif (user.get(session.get("username")).get("power")=="super") %}
+                                <input class="radio_type" type="radio" name="power" value="admin" id="admin"/>
+                                <label for="admin">管理员</label>
+                                {% endif %}
+
+                                {% if user.get(uns).get("power")=="user" %}
+                                <input class="radio_type" type="radio" name="power" value="user" id="user" checked/>
+                                <label for="user">用户</label>
+                                {% else %}
+                                <input class="radio_type" type="radio" name="power" value="user" id="user"/>
+                                <label for="user">用户</label>
+                                {% endif %}
+
+                                {% if user.get(uns).get("power")=="banned" %}
+                                <input class="radio_type" type="radio" name="power" value="banned" id="banned" checked/>
+                                <label for="banned">封禁用户</label>
+                                {% else %}
+                                <input class="radio_type" type="radio" name="power" value="banned" id="banned"/>
+                                <label for="banned">封禁用户</label>
+                                {% endif %}
+                            {% else %}
+                                <input class="radio_type" type="radio" name="power" value="super" id="super"/>
+                                <label for="super">超级管理员</label>
+                                <input class="radio_type" type="radio" name="power" value="admin" id="admin"/>
+                                <label for="admin">管理员</label>
+                                <input class="radio_type" type="radio" name="power" value="user" id="user" checked/>
+                                <label for="user">用户</label>
+                                <input class="radio_type" type="radio" name="power" value="banned" id="banned"/>
+                                <label for="banned">封禁用户</label>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <span class="info_name">操作备注</span>
+                            <input type="text" name="note"/>
+                        </div>
+                        <div>
+                            <span class="info_name">个人介绍</span>
+                            <div class="blogc">
+                                <div class="mk-editor">
+                                    {% if uns in user %}
+                                    <textarea id="editor-edit" class="cur" name="bio" rows="20" cols="80" placeholder="个人介绍" style="border: none;">{{ user.get(uns).get("bio") | safe }}</textarea>
+                                    {% else %}
+                                    <textarea id="editor-edit" class="cur" name="bio" rows="20" cols="80" placeholder="个人介绍" style="border: none;"></textarea>
+                                    {% endif %}
+                                    <div id="editor-show" style="width: 50%;">Loading...</div>
+                                </div>
+                                <p><small>建议使用 Markdown、KaTeX 等工具。</small></p>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <input type="submit" value="保存">
+                            <a href="/admin/user/del/{{ uns }}" target="_self" title="删除" class="bmcss">删除</a>
+                        </div>
+                    </form>
+                </div>
+			</div>
+		</div>
+
+        <footer>
+            <div class="max" style="text-align: right;">
+                <h4 class="my-h4">{{ web_footer | safe }}</h4>
+            </div>
+        </footer>
+    </body>
+</html>

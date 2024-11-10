@@ -2,6 +2,8 @@
 
 [QFMblog](https://github.com/qifanmaker/QFMblog) 是由 [qifan_maker](https://github.com/qifanmaker) 基于 python / Flask 开发的集成式个人博客系统。
 
+支持 Markdown 与 LaTeX。
+
 ## 开源许可
 
 采用 AGPL-3.0 进行授权。
@@ -27,6 +29,8 @@
 # QFMblog
 
 [QFMblog](https://github.com/qifanmaker/QFMblog) is an integrated personal blog system developed by [qifan_maker](https://github.com/qifanmaker) based on python/Flask.
+
+Supports Markdown and LaTeX.
 
 ## Open Source License
 

@@ -943,18 +943,6 @@ def deluser(uns):
         else:
             abort(403)
 
-@app.route("/admin/es/list", methods=["GET"])
-def esmanage():
-    if request.method == "GET":
-        username = userpw = None
-        if (check_login()):
-            username = session.get("username")
-            userpw = session.get("password")
-        if (check_acc(username,userpw,1)==10):
-            return render_template("es_list.html",esl=esl,web_name=web_name,web_footer=web_footer,user=user)
-        else:
-            abort(403)
-
 @app.route("/admin/image/list", methods=["GET"])
 def admin_image():
     if request.method == "GET":

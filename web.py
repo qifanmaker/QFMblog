@@ -98,27 +98,6 @@ def updata_data():
     read_judge()
 updata_data()
 
-punctuation = {
-    ",",
-    ".",
-    ":",
-    "：",
-    "，",
-    "。",
-    "；",
-    ";",
-    "(",
-    ")",
-    "（",
-    "）",
-    "—",
-    "_",
-    "！",
-    "!",
-    "？",
-    "?"
-}
-
 def check_acc(username,password,lv):
     """
     0: NotFindUser; 
